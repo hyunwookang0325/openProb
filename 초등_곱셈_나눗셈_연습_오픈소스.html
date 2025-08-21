@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>곱하기/나누기 연습</title>
+  <style>
+    :root {
+      --bg: #0f172a;        /* slate-900 */
+      --panel: #111827;     /* gray-900 */
+      --ink: #e5e7eb;       /* gray-200 */
+      --muted: #94a3b8;     /* slate-400 */
+      --accent: #22c55e;    /* green-500 */
+      --accent-2: #3b82f6;  /* blue-500 */
+      --danger: #ef4444;    /* red-500 */
+      --warn: #f59e0b;      /* amber-500 */
+      --card: #0b1220;      /* custom */
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin:0; font-family: ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif; color: var(--ink); background: radial-gradient(1200px 800px at 80% -10%, #1e293b 0%, #0f172a 40%, #0b1220 100%); }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 320px 1fr; gap: 16px; }
+    @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } }
+    .panel { background: rgba(17,24,39,.7); backdrop-filter: blur(6px); border: 1px solid rgba(148,163,184,.18); border-radius: 18px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    h1 { font-weight: 800; letter-spacing: -0.02em; font-size: 28px; margin: 0 0 10px; }
+    h2 { font-size: 16px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 10px 0 8px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    label { font-size: 14px; color: var(--muted); display: block; margin-bottom: 6px; }
+    select, input[type="number"], input[type="text"], button { width: 100%; border-radius: 12px; border: 1px solid rgba(148,163,184,.25); background: #0b1220; color: var(--ink); padding: 12px 14px; font-size: 16px; }
+    select:focus, input:focus, button:focus { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+    button.primary { background: linear-gradient(135deg, var(--accent-2), #06b6d4); border: none; color: white; font-weight: 700; cursor: pointer; }
+    button.ghost { background: transparent; border: 1px dashed rgba(148,163,184,.45); color: var(--muted); }
+    button.warn { background: linear-gradient(135deg, var(--warn), #ef4444); border: none; color: #111; font-weight: 800; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .stack { display: grid; gap: 12px; }
+    .big { font-size: clamp(28px, 4.8vw, 56px); font-weight: 900; letter-spacing: 0.01em; text-align: center; }
+    .center { text-align: center; }
+    .muted { color: var(--muted); }
+    .badge { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:rgba(59,130,246,.12); color:#bfdbfe; font-weight:700; }
+    .grid2 { display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:end; }
+    .progress { height: 10px; border-radius: 999px; background: rgba(148,163,184,.25); overflow:hidden; }
+    .bar { height: 100%; background: linear-gradient(90deg, var(--accent), #16a34a); width:0%; transition: width .25s ease; }
+    .pill { border: 1px solid rgba(148,163,184,.25); border-radius: 12px; padding: 10px 12px; background:#0b1220; }
+    .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    @media (max-width: 600px){ .kpi{ grid-template-columns: repeat(2,1fr);} }
+    .kpi .card { background: rgba(148,163,184,.08); border: 1px solid rgba(148,163,184,.18); border-radius: 16px; padding: 12px; text-align:center; }
+    .kpi .val { font-size: 22px; font-weight: 900; }
+    .hint { border-left: 4px solid var(--accent-2); background: rgba(59,130,246,.1); padding: 10px 12px; border-radius: 10px; font-size: 14px; color: #dbeafe; }
+    .list { display:grid; gap:8px; }
+    .wrong { border: 1px solid rgba(239,68,68,.3); background: rgba(239,68,68,.07); border-radius: 12px; padding: 8px 10px; }
+    .right { border: 1px solid rgba(34,197,94,.35); background: rgba(34,197,94,.08); border-radius: 12px; padding: 8px 10px; }
+    .footer { font-size: 12px; color: var(--muted); margin-top: 8px; text-align:center; }
+    .flex { display:flex; gap:10px; align-items:center; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- 설정 패널 -->
+    <aside class="panel" id="settings">
+      <h1>곱하기/나누기 연습</h1>
+      <p class="muted" style="margin:6px 0 14px">초등학생을 위한 계산 연습. 큰 글자, 즉시 채점, 틀린 문제 복습이 포함됩니다.</p>
+
+      <div class="stack">
+        <div>
+          <label for="mode">연습 종류</label>
+          <select id="mode" aria-label="연습 종류">
+            <option value="mul">곱하기 (×)</option>
+            <option value="div">나누기 (÷)</option>
+            <option value="mix">섞어서 (×와 ÷)</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="minN">최소 숫자</label>
+            <input id="minN" type="number" min="1" max="99" value="1" />
+          </div>
+          <div>
+            <label for="maxN">최대 숫자</label>
+            <input id="maxN" type="number" min="1" max="99" value="9" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="count">문제 개수</label>
+            <input id="count" type="number" min="3" max="100" value="10" />
+          </div>
+          <div>
+            <label for="timeLimit">제한시간 (초) <span class="muted">— 0이면 시간제한 없음</span></label>
+            <input id="timeLimit" type="number" min="0" max="3600" value="0" />
+          </div>
+        </div>
+
+        <div class="row">
+          <button class="ghost" id="btn-easy">초급: 1~9, 10문제</button>
+          <button class="ghost" id="btn-hard">중급: 2~12, 20문제</button>
+        </div>
+
+        <button class="primary" id="startBtn">시작하기</button>
+        <div class="footer">오픈소스 예시 · 한 파일로 실행됩니다.</div>
+      </div>
+    </aside>
+
+    <!-- 메인 영역 -->
+    <main class="panel" id="main">
+      <div id="pre">
+        <div class="center" style="margin-top: 20px">
+          <div class="badge" title="최고 기록은 브라우저에 저장됩니다.">최고 기록 <span id="bestLabel">—</span></div>
+        </div>
+        <div class="big" style="margin: 18px 0 8px;">왼쪽에서 설정하고 <span style="color:#93c5fd">시작하기</span> 버튼을 눌러 주세요.</div>
+        <p class="center muted">곱셈은 “a × b”, 나눗셈은 “c ÷ d” 꼴로 나옵니다. 나눗셈은 나머지 없이 딱 나누어 떨어지는 문제만 나옵니다.</p>
+      </div>
+
+      <div id="quiz" style="display:none">
+        <div class="grid2" style="margin-bottom: 10px;">
+          <div class="pill">
+            <span id="progressText">1 / 10</span>
+            · 정답 <b id="okCnt">0</b> · 오답 <b id="ngCnt">0</b>
+          </div>
+          <div class="pill">⏱️ <span id="timer">0:00</span></div>
+        </div>
+        <div class="progress"><div class="bar" id="bar"></div></div>
+
+        <div style="margin: 20px 0 10px" class="center">
+          <div id="qText" class="big">3 × 4 = ?</div>
+        </div>
+
+        <form id="answerForm" autocomplete="off">
+          <div class="row">
+            <input id="answer" type="number" inputmode="numeric" placeholder="정답 입력" required />
+            <button class="primary" id="submitBtn" type="submit">정답 제출 (Enter)</button>
+          </div>
+        </form>
+
+        <div style="margin-top: 10px" class="row">
+          <button class="ghost" id="hintBtn" type="button">힌트 보기</button>
+          <button class="ghost" id="skipBtn" type="button">건너뛰기</button>
+        </div>
+
+        <div id="feedback" style="margin-top:14px"></div>
+        <div id="hint" class="hint" style="display:none; margin-top:10px"></div>
+      </div>
+
+      <div id="post" style="display:none">
+        <h2>결과</h2>
+        <div class="kpi">
+          <div class="card"><div class="muted">점수</div><div class="val" id="score">0 / 0</div></div>
+          <div class="card"><div class="muted">정답률</div><div class="val" id="acc">0%</div></div>
+          <div class="card"><div class="muted">소요 시간</div><div class="val" id="used">0:00</div></div>
+          <div class="card"><div class="muted">최고 기록</div><div class="val" id="best">—</div></div>
+        </div>
+        <div style="margin-top:16px" class="flex">
+          <button class="primary" id="retry">다시 풀기</button>
+          <button class="warn" id="resetBest">최고 기록 초기화</button>
+        </div>
+        <h2 style="margin-top:16px">오답 노트</h2>
+        <div id="wrongList" class="list"></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Utility
+    const $ = (sel) => document.querySelector(sel);
+    const fmtTime = (s) => {
+      s = Math.max(0, Math.floor(s));
+      const m = Math.floor(s/60), r = s%60; return `${m}:${r.toString().padStart(2,'0')}`;
+    };
+    const randInt = (min, max) => Math.floor(Math.random()*(max-min+1))+min;
+
+    function genMul(min, max){
+      const a = randInt(min, max); const b = randInt(min, max);
+      return {op:'×', a, b, text:`${a} × ${b} = ?`, answer: a*b, hint:`${a}를 ${b}번 더해요 → ${Array(b).fill(a).join(' + ')} = ${a*b}`};
+    }
+    function genDiv(min, max){
+      const d = randInt(Math.max(1,min), Math.max(1,max));
+      const q = randInt(Math.max(1,min), Math.max(1,max));
+      const n = d*q; // exact division only
+      return {op:'÷', a:n, b:d, text:`${n} ÷ ${d} = ?`, answer: q, hint:`${n} = ${d} × ?  →  ${d} × ${q} = ${n}`};
+    }
+    function genProblem(mode, min, max){
+      if(mode==='mul') return genMul(min,max);
+      if(mode==='div') return genDiv(min,max);
+      return (Math.random()<0.5)? genMul(min,max) : genDiv(min,max);
+    }
+
+    // State
+    let problems = [];
+    let cur = 0, ok = 0, ng = 0; 
+    let startedAt = 0, timerId = null, timeLimit = 0, leftSec = 0;
+    let settingsCache = {};
+    let wrongs = [];
+
+    // Elements
+    const els = {
+      pre: $('#pre'), quiz: $('#quiz'), post: $('#post'),
+      qText: $('#qText'), ans: $('#answer'), form: $('#answerForm'),
+      okCnt: $('#okCnt'), ngCnt: $('#ngCnt'), bar: $('#bar'), progressText: $('#progressText'),
+      feedback: $('#feedback'), hint: $('#hint'), timer: $('#timer'), submitBtn: $('#submitBtn'),
+      bestLabel: $('#bestLabel'), wrongList: $('#wrongList'), score: $('#score'), acc: $('#acc'), used: $('#used'), best: $('#best')
+    };
+
+    // Best score storage key
+    function bestKey(mode, min, max){ return `best:${mode}:${min}-${max}`; }
+
+    function loadBest(){
+      const mode = $('#mode').value; const min = +$('#minN').value; const max = +$('#maxN').value;
+      const key = bestKey(mode,min,max);
+      const v = localStorage.getItem(key);
+      els.bestLabel.textContent = v? v+"%" : '—';
+    }
+
+    // Initialize buttons
+    $('#btn-easy').addEventListener('click', ()=>{ $('#minN').value=1; $('#maxN').value=9; $('#count').value=10; $('#timeLimit').value=0; loadBest(); });
+    $('#btn-hard').addEventListener('click', ()=>{ $('#minN').value=2; $('#maxN').value=12; $('#count').value=20; $('#timeLimit').value=120; loadBest(); });
+    ['mode','minN','maxN'].forEach(id=>{ $('#'+id).addEventListener('change', loadBest); });
+
+    function start(){
+      // Read settings
+      const mode = $('#mode').value;
+      const min = Math.min(+$('#minN').value || 1, +$('#maxN').value || 9);
+      const max = Math.max(+$('#minN').value || 1, +$('#maxN').value || 9);
+      const count = Math.min(Math.max(+$('#count').value || 10, 3), 100);
+      timeLimit = Math.max(0, +$('#timeLimit').value || 0);
+      leftSec = timeLimit;
+      settingsCache = {mode,min,max,count};
+
+      // Build problems
+      problems = Array.from({length: count}, ()=> genProblem(mode,min,max));
+      cur = 0; ok = 0; ng = 0; wrongs = [];
+
+      // UI swap
+      els.pre.style.display = 'none';
+      els.post.style.display = 'none';
+      els.quiz.style.display = '';
+      $('#settings').style.opacity = .9;
+
+      // Timer
+      clearInterval(timerId);
+      startedAt = Date.now();
+      els.timer.textContent = timeLimit? fmtTime(leftSec) : '진행 중';
+      if(timeLimit>0){
+        timerId = setInterval(()=>{
+          leftSec--; els.timer.textContent = fmtTime(leftSec);
+          if(leftSec<=0){ clearInterval(timerId); end(); }
+        }, 1000);
+      } else {
+        timerId = setInterval(()=>{
+          const elapsed = Math.floor((Date.now()-startedAt)/1000);
+          els.timer.textContent = fmtTime(elapsed);
+        }, 1000);
+      }
+
+      renderProblem();
+    }
+
+    function renderProblem(){
+      const p = problems[cur];
+      els.qText.textContent = p.text;
+      els.progressText.textContent = `${cur+1} / ${problems.length}`;
+      els.bar.style.width = `${((cur)/problems.length)*100}%`;
+      els.okCnt.textContent = ok; els.ngCnt.textContent = ng;
+      els.feedback.innerHTML = '';
+      els.hint.style.display = 'none'; els.hint.textContent = '';
+      els.ans.value = '';
+      els.ans.focus();
+    }
+
+    function submit(answerVal){
+      const p = problems[cur];
+      const ans = Number.isFinite(+answerVal) ? +answerVal : NaN;
+      const correct = ans === p.answer;
+      if(correct){
+        ok++; els.feedback.innerHTML = `<div class="right">정답! (${p.text.replace(' = ?', ' = '+p.answer)})</div>`;
+      } else {
+        ng++; els.feedback.innerHTML = `<div class="wrong">오답이에요. 정답은 <b>${p.answer}</b> 입니다.</div>`;
+        wrongs.push({ p: p.text, correct: p.answer, yours: isNaN(ans)? '—' : ans });
+      }
+      cur++;
+      els.okCnt.textContent = ok; els.ngCnt.textContent = ng;
+      els.bar.style.width = `${((cur)/problems.length)*100}%`;
+
+      if(cur >= problems.length){ end(); }
+      else setTimeout(renderProblem, 350);
+    }
+
+    function end(){
+      clearInterval(timerId);
+      els.quiz.style.display = 'none';
+      els.post.style.display = '';
+
+      const total = problems.length; const score = ok;
+      const acc = Math.round((score/total)*100);
+      const usedSeconds = timeLimit>0 ? (timeLimit - Math.max(0,leftSec)) : Math.floor((Date.now()-startedAt)/1000);
+
+      // Best
+      const key = bestKey(settingsCache.mode, settingsCache.min, settingsCache.max);
+      const prev = Number(localStorage.getItem(key) || '0');
+      if(acc > prev){ localStorage.setItem(key, String(acc)); }
+
+      // Fill summary
+      els.score.textContent = `${score} / ${total}`;
+      els.acc.textContent = `${acc}%`;
+      els.used.textContent = fmtTime(usedSeconds);
+      els.best.textContent = `${Math.max(acc, prev)}%`;
+
+      // Wrong list
+      els.wrongList.innerHTML = '';
+      if(wrongs.length === 0){
+        els.wrongList.innerHTML = '<div class="right">모든 문제를 맞혔어요! 훌륭해요 👏</div>';
+      } else {
+        wrongs.forEach(w=>{
+          const div = document.createElement('div');
+          div.className = 'wrong';
+          div.textContent = `${w.p.replace(' = ?', '')} = ${w.correct}  (내 답: ${w.yours})`;
+          els.wrongList.appendChild(div);
+        });
+      }
+
+      // Prepare preview best label for home screen
+      loadBest();
+    }
+
+    // Events
+    $('#startBtn').addEventListener('click', start);
+    els.form.addEventListener('submit', (e)=>{ e.preventDefault(); submit(els.ans.value.trim()); });
+    $('#skipBtn').addEventListener('click', ()=> submit(NaN));
+    $('#hintBtn').addEventListener('click', ()=>{
+      const p = problems[cur];
+      els.hint.style.display = '';
+      els.hint.textContent = p.hint;
+    });
+    $('#retry').addEventListener('click', ()=>{ els.post.style.display='none'; els.pre.style.display=''; loadBest(); });
+    $('#resetBest').addEventListener('click', ()=>{
+      if(!confirm('최고 기록을 초기화할까요?')) return;
+      // Clear keys for all simple ranges up to 12 to be safe
+      const ranges = [];
+      for(let a=1;a<=12;a++) for(let b=a;b<=12;b++) ranges.push([a,b]);
+      ['mul','div','mix'].forEach(m=>{
+        ranges.forEach(([mi,ma])=> localStorage.removeItem(bestKey(m,mi,ma)));
+      });
+      loadBest();
+      alert('초기화 완료');
+    });
+
+    // First paint
+    loadBest();
+  </script>
+</body>
+</html>
